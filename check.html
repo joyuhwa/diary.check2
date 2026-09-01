@@ -3,292 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <title>상태 선택</title>
-
 <style>
-
-body{
-    font-family:Arial;
-    padding:40px;
-    background:#f5f7fb;
-}
-
-h2{
-    margin-bottom:20px;
-}
-
-label{
-    display:block;
-    font-size:22px;
-    margin:18px 0;
-    cursor:pointer;
-
-    padding:10px 15px;
-    border-radius:10px;
-    width:fit-content;
-}
-
-.writing{
-    background:#ffe867;
-}
-
-.photo_plus{
-    background:#ffe867;
-}
-
-.main_photo{
-    background:#ffe867;
-}
-
-
-/* 날짜 이동 */
-
-#dateNav{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    margin-bottom:20px;
-}
-
-#dateNav h2{
-    margin:0;
-}
-
-#dateNav button{
-    border:none;
-    background:white;
-    width:40px;
-    height:40px;
-    border-radius:10px;
-    font-size:18px;
-    cursor:pointer;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
-}
-
-
-/* 메모 */
-
-#memo{
-    width:100%;
-    max-width:500px;
-    min-height:100px;
-
-    padding:14px;
-    margin-bottom:25px;
-
-    border:1px solid #ddd;
-    border-radius:12px;
-
-    background:white;
-
-    font-family:Arial, sans-serif;
-    font-size:18px;
-
-    resize:vertical;
-    outline:none;
-}
-
-#memo:focus{
-    border-color:#aaa;
-}
-
-#memo::placeholder{
-    color:#aaa;
-}
-
+body{font-family:Arial;padding:40px;background:#f5f7fb;}
+h2{margin-bottom:20px;}
+label{display:block;font-size:22px;margin:18px 0;cursor:pointer;padding:10px 15px;border-radius:10px;width:fit-content;}
+.writing{background:#ffe867;}
+.photo_plus{background:#ffe867;}
+.main_photo{background:#ffe867;}
+#dateNav{display:flex;align-items:center;gap:15px;margin-bottom:20px;}
+#dateNav h2{margin:0;}
+#dateNav button{border:none;background:white;width:40px;height:40px;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.08);}
+#memo{width:100%;max-width:500px;min-height:100px;padding:14px;margin-bottom:25px;border:1px solid #ddd;border-radius:12px;background:white;font-family:Arial,sans-serif;font-size:18px;resize:vertical;outline:none;}
+#memo:focus{border-color:#aaa;}
+#memo::placeholder{color:#aaa;}
 </style>
 </head>
-
 <body>
-
-
-<div id="dateNav">
-    <button id="prevDay">◀</button>
-    <h2 id="title"></h2>
-    <button id="nextDay">▶</button>
-</div>
-
-
-<!-- 메모 -->
-
-<textarea
-    id="memo"
-    placeholder="메모를 입력하세요..."
-></textarea>
-
-
-<!-- 체크박스 -->
-
-<label class="writing">
-    <input type="checkbox" value="writing"> 글쓰기
-</label>
-
-<label class="photo_plus">
-    <input type="checkbox" value="photo_plus"> 사진 추가
-</label>
-
-<label class="main_photo">
-    <input type="checkbox" value="main_photo"> 대표 사진
-</label>
-
-
+<div id="dateNav"><button id="prevDay">◀</button><h2 id="title"></h2><button id="nextDay">▶</button></div>
+<textarea id="memo" placeholder="메모를 입력하세요..."></textarea>
+<label class="writing"><input type="checkbox" value="writing"> 글쓰기</label>
+<label class="photo_plus"><input type="checkbox" value="photo_plus"> 사진 추가</label>
+<label class="main_photo"><input type="checkbox" value="main_photo"> 대표 사진</label>
 <script>
-
 const params = new URLSearchParams(location.search);
 const date = params.get("date");
-
 let currentDate = new Date(date + "T00:00:00");
-
-
-// 날짜 문자열 만들기
-
 function getDateString(){
-
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2,"0");
-    const day = String(currentDate.getDate()).padStart(2,"0");
-
+    const year=currentDate.getFullYear();
+    const month=String(currentDate.getMonth()+1).padStart(2,"0");
+    const day=String(currentDate.getDate()).padStart(2,"0");
     return `${year}-${month}-${day}`;
-
 }
-
-
-// 날짜 표시 + 체크 + 메모 불러오기
-
 function updateDate(){
-
-    const dateString = getDateString();
-
-    document.getElementById("title").innerText = dateString;
-
+    const dateString=getDateString();
+    document.getElementById("title").innerText=dateString;
     loadCheck(dateString);
     loadMemo(dateString);
-
-    // 주소창의 date도 변경
-    history.replaceState(
-        null,
-        "",
-        `check.html?date=${dateString}`
-    );
-
+    history.replaceState(null,"",`check.html?date=${dateString}`);
 }
-
-
-// 체크 상태 불러오기
-
+function normalizeStates(states){
+    return states.map(value=>{
+        if(value==="editing") return "writing";
+        if(value==="photo") return "photo_plus";
+        if(value==="nomain") return "main_photo";
+        return value;
+    });
+}
 function loadCheck(dateString){
-
-    const key = "check_" + dateString;
-
-    const saved = JSON.parse(
-        localStorage.getItem(key) || "[]"
-    );
-
-    document.querySelectorAll(
-        'input[type="checkbox"]'
-    ).forEach(checkbox => {
-
-        checkbox.checked = saved.includes(
-            checkbox.value
-        );
-
-    });
-
-}
-
-
-// 메모 불러오기
-
-function loadMemo(dateString){
-
-    const key = "memo_" + dateString;
-
-    const savedMemo =
-        localStorage.getItem(key) || "";
-
-    document.getElementById("memo").value =
-        savedMemo;
-
-}
-
-
-// 체크 상태 저장
-
-document.querySelectorAll(
-    'input[type="checkbox"]'
-).forEach(checkbox => {
-
-    checkbox.addEventListener("change", () => {
-
-        const dateString = getDateString();
-
-        const key = "check_" + dateString;
-
-        const checked = Array.from(
-            document.querySelectorAll(
-                'input[type="checkbox"]:checked'
-            )
-        ).map(input => input.value);
-
-        localStorage.setItem(
-            key,
-            JSON.stringify(checked)
-        );
-
-    });
-
-});
-
-
-// 메모 자동 저장
-
-document.getElementById("memo").addEventListener(
-    "input",
-    () => {
-
-        const dateString = getDateString();
-
-        const key = "memo_" + dateString;
-
-        localStorage.setItem(
-            key,
-            document.getElementById("memo").value
-        );
-
+    const key="check2_"+dateString;
+    let saved=[];
+    const newData=localStorage.getItem(key);
+    if(newData){
+        try{
+            const parsed=JSON.parse(newData);
+            saved=Array.isArray(parsed)?parsed:[parsed];
+        }catch(e){
+            saved=[newData];
+        }
+    }else{
+        const oldData=localStorage.getItem("check_"+dateString);
+        if(oldData){
+            try{
+                const parsed=JSON.parse(oldData);
+                saved=Array.isArray(parsed)?parsed:[parsed];
+            }catch(e){
+                saved=[oldData];
+            }
+        }
     }
-);
-
-
-// 이전 날짜
-
-document.getElementById("prevDay").onclick = () => {
-
-    currentDate.setDate(
-        currentDate.getDate() - 1
-    );
-
-    updateDate();
-
-};
-
-
-// 다음 날짜
-
-document.getElementById("nextDay").onclick = () => {
-
-    currentDate.setDate(
-        currentDate.getDate() + 1
-    );
-
-    updateDate();
-
-};
-
-
-// 처음 열었을 때
-
+    const normalized=normalizeStates(saved);
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox=>{
+        checkbox.checked=normalized.includes(checkbox.value);
+    });
+}
+function loadMemo(dateString){
+    const key="memo_"+dateString;
+    document.getElementById("memo").value=localStorage.getItem(key)||"";
+}
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox=>{
+    checkbox.addEventListener("change",()=>{
+        const dateString=getDateString();
+        const key="check2_"+dateString;
+        const checked=Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(input=>input.value);
+        localStorage.setItem(key,JSON.stringify(checked));
+    });
+});
+document.getElementById("memo").addEventListener("input",()=>{
+    const dateString=getDateString();
+    localStorage.setItem("memo_"+dateString,document.getElementById("memo").value);
+});
+document.getElementById("prevDay").onclick=()=>{currentDate.setDate(currentDate.getDate()-1);updateDate();};
+document.getElementById("nextDay").onclick=()=>{currentDate.setDate(currentDate.getDate()+1);updateDate();};
 updateDate();
-
 </script>
-
 </body>
 </html>
