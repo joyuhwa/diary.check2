@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <title>Diary Check</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<h9>ver. 26/9/1/16:30</h9>
+<h9>ver. 26/9/1/14:38</h9>
 
 <style>
 
@@ -641,6 +641,56 @@ function updateMonthTitle(){
 
 
 /* =========================
+   저장된 상태 읽기
+   새 사이트: check2_날짜
+   예전 사이트: check_날짜
+========================= */
+
+function getSavedStates(dateStr){
+
+  let raw =
+    localStorage.getItem("check2_" + dateStr);
+
+  if(raw === null){
+    raw = localStorage.getItem("check_" + dateStr);
+  }
+
+  if(raw === null || raw === ""){
+    return [];
+  }
+
+  try{
+    const parsed = JSON.parse(raw);
+
+    if(Array.isArray(parsed)){
+      return parsed;
+    }
+
+    if(typeof parsed === "string"){
+      return [parsed];
+    }
+
+  }catch(e){
+    return [raw];
+  }
+
+  return [];
+}
+
+function normalizeStates(states){
+
+  return states.map(state => {
+
+    if(state === "editing") return "writing";
+    if(state === "photo") return "photo_plus";
+    if(state === "nomain") return "main_photo";
+
+    return state;
+  });
+}
+
+
+/* =========================
    미완료 날짜 표시
 ========================= */
 
@@ -667,10 +717,8 @@ function updateIncompleteList(
     const dateStr =
       getDateString(day);
 
-    const saved = JSON.parse(
-      localStorage.getItem(
-        "check_" + dateStr
-      ) || "[]"
+    const saved = normalizeStates(
+      getSavedStates(dateStr)
     );
 
 
@@ -734,10 +782,8 @@ function updateMonthlyStats(){
     const dateStr =
       getDateString(day);
 
-    const saved = JSON.parse(
-      localStorage.getItem(
-        "check_" + dateStr
-      ) || "[]"
+    const saved = normalizeStates(
+      getSavedStates(dateStr)
     );
 
 
@@ -1076,10 +1122,8 @@ function renderCalendar(){
       getDateString(day);
 
 
-    const saved = JSON.parse(
-      localStorage.getItem(
-        "check_" + dateStr
-      ) || "[]"
+    const saved = normalizeStates(
+      getSavedStates(dateStr)
     );
 
 
