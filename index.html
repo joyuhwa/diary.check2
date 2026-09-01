@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <title>Diary Check</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<h9>ver. 26/9/1/14:05</h9>
+<h9>ver. 26/9/1/14:38</h9>
 
 <style>
 
@@ -70,6 +70,9 @@ h1{
   margin-bottom:16px;
 }
 
+
+/* 통계 한 줄 */
+
 .stat-row{
   display:flex;
   align-items:center;
@@ -77,10 +80,30 @@ h1{
   font-size:16px;
 }
 
+
+/* 클릭 가능한 항목 */
+
+.stat-clickable{
+  cursor:pointer;
+  border-radius:10px;
+  padding:7px 6px;
+  transition:.15s ease;
+}
+
+.stat-clickable:hover{
+  background:#f5f5f5;
+}
+
+
+/* 이름 */
+
 .stat-name{
   width:100px;
   font-weight:600;
 }
+
+
+/* 진행률 바 */
 
 .stat-bar{
   flex:1;
@@ -104,6 +127,9 @@ h1{
   font-weight:600;
 }
 
+
+/* 총 진행률 */
+
 .total-stat{
   margin-top:18px;
   padding-top:16px;
@@ -113,6 +139,32 @@ h1{
 
 .total-stat .stat-fill{
   background:#d6a3ff;
+}
+
+
+/* =========================
+   미완료 날짜
+========================= */
+
+.incomplete-list{
+  display:none;
+  margin:4px 0 12px 106px;
+  padding:12px 15px;
+  background:#f5f7fb;
+  border-radius:10px;
+  font-size:14px;
+  color:#555;
+  line-height:1.7;
+}
+
+.incomplete-list.show{
+  display:block;
+}
+
+.incomplete-title{
+  font-weight:700;
+  color:#333;
+  margin-bottom:4px;
 }
 
 
@@ -322,6 +374,11 @@ h1{
     font-size:14px;
   }
 
+  .incomplete-list{
+    margin-left:86px;
+    font-size:13px;
+  }
+
   .empty-day{
     min-height:60px;
   }
@@ -351,7 +408,13 @@ h1{
     📊 이번 달 진행 상황
   </div>
 
-  <div class="stat-row">
+
+  <!-- 글쓰기 -->
+
+  <div
+    class="stat-row stat-clickable"
+    id="editingRow"
+  >
 
     <div class="stat-name">
       글쓰기
@@ -373,8 +436,18 @@ h1{
 
   </div>
 
+  <div
+    class="incomplete-list"
+    id="editingList"
+  ></div>
 
-  <div class="stat-row">
+
+  <!-- 사진 추가 -->
+
+  <div
+    class="stat-row stat-clickable"
+    id="photoRow"
+  >
 
     <div class="stat-name">
       사진 추가
@@ -396,8 +469,18 @@ h1{
 
   </div>
 
+  <div
+    class="incomplete-list"
+    id="photoList"
+  ></div>
 
-  <div class="stat-row">
+
+  <!-- 대표 사진 -->
+
+  <div
+    class="stat-row stat-clickable"
+    id="nomainRow"
+  >
 
     <div class="stat-name">
       대표 사진
@@ -419,6 +502,13 @@ h1{
 
   </div>
 
+  <div
+    class="incomplete-list"
+    id="nomainList"
+  ></div>
+
+
+  <!-- 총 진행률 -->
 
   <div class="stat-row total-stat">
 
@@ -492,8 +582,11 @@ h1{
 
 <script>
 
-let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth() + 1;
+let currentYear =
+  new Date().getFullYear();
+
+let currentMonth =
+  new Date().getMonth() + 1;
 
 
 const monthTitle =
@@ -548,6 +641,72 @@ function updateMonthTitle(){
 
 
 /* =========================
+   미완료 날짜 표시
+========================= */
+
+function updateIncompleteList(
+  type,
+  count,
+  lastDay
+){
+
+  const list =
+    document.getElementById(
+      type + "List"
+    );
+
+  const incompleteDates = [];
+
+
+  for(
+    let day = 1;
+    day <= lastDay;
+    day++
+  ){
+
+    const dateStr =
+      getDateString(day);
+
+    const saved = JSON.parse(
+      localStorage.getItem(
+        "check_" + dateStr
+      ) || "[]"
+    );
+
+
+    if(!saved.includes(type)){
+
+      incompleteDates.push(day);
+      
+
+    }
+
+  }
+
+
+  if(incompleteDates.length === 0){
+
+    list.innerHTML =
+      `<div class="incomplete-title">
+        🎉 모두 완료!
+      </div>`;
+
+  }
+
+  else{
+
+    list.innerHTML =
+      `<div class="incomplete-title">
+        아직 안 한 날짜
+      </div>
+      ${incompleteDates.join(" · ")}`;
+
+  }
+
+}
+
+
+/* =========================
    월별 통계
 ========================= */
 
@@ -566,7 +725,11 @@ function updateMonthlyStats(){
   let nomainCount = 0;
 
 
-  for(let day = 1; day <= lastDay; day++){
+  for(
+    let day = 1;
+    day <= lastDay;
+    day++
+  ){
 
     const dateStr =
       getDateString(day);
@@ -595,17 +758,23 @@ function updateMonthlyStats(){
 
   const editingPercent =
     Math.round(
-      editingCount / lastDay * 100
+      editingCount /
+      lastDay *
+      100
     );
 
   const photoPercent =
     Math.round(
-      photoCount / lastDay * 100
+      photoCount /
+      lastDay *
+      100
     );
 
   const nomainPercent =
     Math.round(
-      nomainCount / lastDay * 100
+      nomainCount /
+      lastDay *
+      100
     );
 
 
@@ -627,25 +796,22 @@ function updateMonthlyStats(){
     );
 
 
-  // 숫자 표시
+  /* 숫자 */
 
   document.getElementById(
     "editingPercent"
   ).textContent =
     editingPercent + "%";
 
-
   document.getElementById(
     "photoPercent"
   ).textContent =
     photoPercent + "%";
 
-
   document.getElementById(
     "nomainPercent"
   ).textContent =
     nomainPercent + "%";
-
 
   document.getElementById(
     "totalPercent"
@@ -653,32 +819,93 @@ function updateMonthlyStats(){
     totalPercent + "%";
 
 
-  // 막대 길이
+  /* 막대 */
 
   document.getElementById(
     "editingBar"
   ).style.width =
     editingPercent + "%";
 
-
   document.getElementById(
     "photoBar"
   ).style.width =
     photoPercent + "%";
-
 
   document.getElementById(
     "nomainBar"
   ).style.width =
     nomainPercent + "%";
 
-
   document.getElementById(
     "totalBar"
   ).style.width =
     totalPercent + "%";
 
+
+  /* 미완료 날짜 */
+
+  updateIncompleteList(
+    "editing",
+    editingCount,
+    lastDay
+  );
+
+  updateIncompleteList(
+    "photo",
+    photoCount,
+    lastDay
+  );
+
+  updateIncompleteList(
+    "nomain",
+    nomainCount,
+    lastDay
+  );
+
 }
+
+
+/* =========================
+   통계 클릭
+========================= */
+
+function toggleList(type){
+
+  const list =
+    document.getElementById(
+      type + "List"
+    );
+
+  list.classList.toggle("show");
+
+}
+
+
+document.getElementById(
+  "editingRow"
+).onclick = () => {
+
+  toggleList("editing");
+
+};
+
+
+document.getElementById(
+  "photoRow"
+).onclick = () => {
+
+  toggleList("photo");
+
+};
+
+
+document.getElementById(
+  "nomainRow"
+).onclick = () => {
+
+  toggleList("nomain");
+
+};
 
 
 /* =========================
@@ -806,7 +1033,7 @@ function renderCalendar(){
     ).getDate();
 
 
-  // 빈 날짜
+  /* 빈 날짜 */
 
   for(
     let i = 0;
@@ -827,7 +1054,7 @@ function renderCalendar(){
   }
 
 
-  // 날짜
+  /* 날짜 */
 
   for(
     let day = 1;
@@ -919,4 +1146,3 @@ renderCalendar();
 
 </body>
 </html>
-
