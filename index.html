@@ -247,15 +247,15 @@ h1{
   background:#ff8a8a;
 }
 
-.day.editing{
+.day.writing{
   background:#ffe867;
 }
 
-.day.photo{
+.day.photo_plus{
   background:#a8f08a;
 }
 
-.day.nomain{
+.day.main_photo{
   background:#87bfff;
 }
 
@@ -413,7 +413,7 @@ h1{
 
   <div
     class="stat-row stat-clickable"
-    id="editingRow"
+    id="writingRow"
   >
 
     <div class="stat-name">
@@ -423,13 +423,13 @@ h1{
     <div class="stat-bar">
       <div
         class="stat-fill"
-        id="editingBar"
+        id="writingBar"
       ></div>
     </div>
 
     <div
       class="stat-percent"
-      id="editingPercent"
+      id="writingPercent"
     >
       0%
     </div>
@@ -438,7 +438,7 @@ h1{
 
   <div
     class="incomplete-list"
-    id="editingList"
+    id="writingList"
   ></div>
 
 
@@ -446,7 +446,7 @@ h1{
 
   <div
     class="stat-row stat-clickable"
-    id="photoRow"
+    id="photo_plusRow"
   >
 
     <div class="stat-name">
@@ -456,13 +456,13 @@ h1{
     <div class="stat-bar">
       <div
         class="stat-fill"
-        id="photoBar"
+        id="photo_plusBar"
       ></div>
     </div>
 
     <div
       class="stat-percent"
-      id="photoPercent"
+      id="photo_plusPercent"
     >
       0%
     </div>
@@ -471,7 +471,7 @@ h1{
 
   <div
     class="incomplete-list"
-    id="photoList"
+    id="photo_plusList"
   ></div>
 
 
@@ -479,7 +479,7 @@ h1{
 
   <div
     class="stat-row stat-clickable"
-    id="nomainRow"
+    id="main_photoRow"
   >
 
     <div class="stat-name">
@@ -489,13 +489,13 @@ h1{
     <div class="stat-bar">
       <div
         class="stat-fill"
-        id="nomainBar"
+        id="main_photoBar"
       ></div>
     </div>
 
     <div
       class="stat-percent"
-      id="nomainPercent"
+      id="main_photoPercent"
     >
       0%
     </div>
@@ -504,7 +504,7 @@ h1{
 
   <div
     class="incomplete-list"
-    id="nomainList"
+    id="main_photoList"
   ></div>
 
 
@@ -720,9 +720,9 @@ function updateMonthlyStats(){
     ).getDate();
 
 
-  let editingCount = 0;
-  let photoCount = 0;
-  let nomainCount = 0;
+  let writingCount = 0;
+  let photo_plusCount = 0;
+  let main_photoCount = 0;
 
 
   for(
@@ -741,47 +741,47 @@ function updateMonthlyStats(){
     );
 
 
-    if(saved.includes("editing")){
-      editingCount++;
+    if(saved.includes("writing")){
+      writingCount++;
     }
 
-    if(saved.includes("photo")){
-      photoCount++;
+    if(saved.includes("photo_plus")){
+      photo_plusCount++;
     }
 
-    if(saved.includes("nomain")){
-      nomainCount++;
+    if(saved.includes("main_photo")){
+      main_photoCount++;
     }
 
   }
 
 
-  const editingPercent =
+  const writingPercent =
     Math.round(
-      editingCount /
+      writingCount /
       lastDay *
       100
     );
 
-  const photoPercent =
+  const photo_plusPercent =
     Math.round(
-      photoCount /
+      photo_plusCount /
       lastDay *
       100
     );
 
-  const nomainPercent =
+  const main_photoPercent =
     Math.round(
-      nomainCount /
+      main_photoCount /
       lastDay *
       100
     );
 
 
   const totalChecked =
-    editingCount +
-    photoCount +
-    nomainCount;
+    writingCount +
+    photo_plusCount +
+    main_photoCount;
 
 
   const totalPossible =
@@ -799,19 +799,19 @@ function updateMonthlyStats(){
   /* 숫자 */
 
   document.getElementById(
-    "editingPercent"
+    "writingPercent"
   ).textContent =
-    editingPercent + "%";
+    writingPercent + "%";
 
   document.getElementById(
-    "photoPercent"
+    "photo_plusPercent"
   ).textContent =
-    photoPercent + "%";
+    photo_plusPercent + "%";
 
   document.getElementById(
-    "nomainPercent"
+    "main_photoPercent"
   ).textContent =
-    nomainPercent + "%";
+    main_photoPercent + "%";
 
   document.getElementById(
     "totalPercent"
@@ -822,19 +822,19 @@ function updateMonthlyStats(){
   /* 막대 */
 
   document.getElementById(
-    "editingBar"
+    "writingBar"
   ).style.width =
-    editingPercent + "%";
+    writingPercent + "%";
 
   document.getElementById(
-    "photoBar"
+    "photo_plusBar"
   ).style.width =
-    photoPercent + "%";
+    photo_plusPercent + "%";
 
   document.getElementById(
-    "nomainBar"
+    "main_photoBar"
   ).style.width =
-    nomainPercent + "%";
+    main_photoPercent + "%";
 
   document.getElementById(
     "totalBar"
@@ -845,20 +845,20 @@ function updateMonthlyStats(){
   /* 미완료 날짜 */
 
   updateIncompleteList(
-    "editing",
-    editingCount,
+    "writing",
+    writingCount,
     lastDay
   );
 
   updateIncompleteList(
-    "photo",
-    photoCount,
+    "photo_plus",
+    photo_plusCount,
     lastDay
   );
 
   updateIncompleteList(
-    "nomain",
-    nomainCount,
+    "main_photo",
+    main_photoCount,
     lastDay
   );
 
@@ -882,28 +882,28 @@ function toggleList(type){
 
 
 document.getElementById(
-  "editingRow"
+  "writingRow"
 ).onclick = () => {
 
-  toggleList("editing");
+  toggleList("writing");
 
 };
 
 
 document.getElementById(
-  "photoRow"
+  "photo_plusRow"
 ).onclick = () => {
 
-  toggleList("photo");
+  toggleList("photo_plus");
 
 };
 
 
 document.getElementById(
-  "nomainRow"
+  "main_photoRow"
 ).onclick = () => {
 
-  toggleList("nomain");
+  toggleList("main_photo");
 
 };
 
@@ -1098,7 +1098,7 @@ function renderCalendar(){
     else if(count === 1){
 
       btn.classList.add(
-        "editing"
+        "writing"
       );
 
     }
@@ -1106,7 +1106,7 @@ function renderCalendar(){
     else if(count === 2){
 
       btn.classList.add(
-        "photo"
+        "photo_plus"
       );
 
     }
@@ -1114,7 +1114,7 @@ function renderCalendar(){
     else if(count === 3){
 
       btn.classList.add(
-        "nomain"
+        "main_photo"
       );
 
     }
