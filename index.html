@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <title>Diary Check</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<h9>ver. 26/9/1/14:58</h9>
+<h9>ver. 26/9/1/17:04</h9>
 
 <style>
 
@@ -1131,35 +1131,55 @@ function renderCalendar(){
       saved.length;
 
 
-    if(count === 0){
+    /*
+      오늘 날짜부터 미래 날짜까지는
+      아직 작성할 수 없는 날짜이므로
+      흰색으로 표시한다.
 
-      btn.classList.add(
-        "before"
-      );
+      어제까지의 날짜만 체크 상태에 따라
+      색상을 표시한다.
+    */
 
-    }
+    const today =
+      new Date();
 
-    else if(count === 1){
+    const todayStr =
+      `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
-      btn.classList.add(
-        "writing"
-      );
 
-    }
+    if(dateStr < todayStr){
 
-    else if(count === 2){
+      if(count === 0){
 
-      btn.classList.add(
-        "photo_plus"
-      );
+        btn.classList.add(
+          "before"
+        );
 
-    }
+      }
 
-    else if(count === 3){
+      else if(count === 1){
 
-      btn.classList.add(
-        "main_photo"
-      );
+        btn.classList.add(
+          "writing"
+        );
+
+      }
+
+      else if(count === 2){
+
+        btn.classList.add(
+          "photo_plus"
+        );
+
+      }
+
+      else if(count === 3){
+
+        btn.classList.add(
+          "main_photo"
+        );
+
+      }
 
     }
 
