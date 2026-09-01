@@ -1,0 +1,922 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Diary Check</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<h9>ver. 26/9/1/14:05</h9>
+
+<style>
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f5f7fb;
+  padding:30px;
+}
+
+#topBar{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:14px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+
+.month-nav-btn{
+  border:none;
+  background:white;
+  width:22px;
+  height:22px;
+  border-radius:4px;
+  font-size:8px;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,0.05);
+  transition:.15s ease;
+}
+
+.month-nav-btn:hover{
+  transform:translateY(-2px);
+}
+
+h1{
+  margin:0;
+  font-size:26px;
+  font-weight:700;
+}
+
+
+/* =========================
+   월별 통계
+========================= */
+
+#monthlyStats{
+  width:100%;
+  max-width:1200px;
+  background:white;
+  border-radius:16px;
+  padding:20px 24px;
+  margin-bottom:20px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.05);
+}
+
+.stats-title{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:16px;
+}
+
+.stat-row{
+  display:flex;
+  align-items:center;
+  margin:10px 0;
+  font-size:16px;
+}
+
+.stat-name{
+  width:100px;
+  font-weight:600;
+}
+
+.stat-bar{
+  flex:1;
+  height:10px;
+  background:#eeeeee;
+  border-radius:10px;
+  overflow:hidden;
+  margin-right:12px;
+}
+
+.stat-fill{
+  height:100%;
+  background:#87bfff;
+  border-radius:10px;
+  transition:width .3s ease;
+}
+
+.stat-percent{
+  width:45px;
+  text-align:right;
+  font-weight:600;
+}
+
+.total-stat{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid #eeeeee;
+  font-size:17px;
+}
+
+.total-stat .stat-fill{
+  background:#d6a3ff;
+}
+
+
+/* =========================
+   캘린더
+========================= */
+
+#calendar{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:14px;
+  max-width:1200px;
+}
+
+#weekdays{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:14px;
+  max-width:1200px;
+  margin-bottom:14px;
+}
+
+.weekday{
+  background:transparent;
+  text-align:center;
+  font-size:18px;
+  font-weight:700;
+  color:#666;
+  padding:8px 0;
+}
+
+.weekday.sunday{
+  color:#ff6b6b;
+}
+
+.weekday.saturday{
+  color:#4d7cff;
+}
+
+.day{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+
+  background:white;
+  border:none;
+
+  font-size:18px;
+  font-weight:600;
+
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,0.05);
+  transition:.15s ease;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  color:#111;
+  -webkit-text-fill-color:#111;
+  -webkit-appearance:none;
+  appearance:none;
+  -webkit-tap-highlight-color:transparent;
+
+  margin:auto;
+}
+
+.empty-day{
+  background:transparent;
+  border:none;
+  min-height:90px;
+}
+
+
+/* =========================
+   날짜 상태 색상
+========================= */
+
+.day.before{
+  background:#ff8a8a;
+}
+
+.day.editing{
+  background:#ffe867;
+}
+
+.day.photo{
+  background:#a8f08a;
+}
+
+.day.nomain{
+  background:#87bfff;
+}
+
+
+/* =========================
+   모달
+========================= */
+
+#overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  padding:20px;
+}
+
+#modalWindow{
+  width:min(1100px, 95vw);
+  height:min(800px, 90vh);
+  background:white;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.28);
+  display:flex;
+  flex-direction:column;
+}
+
+#modalHeader{
+  height:58px;
+  background:#f5f6fa;
+  border-bottom:1px solid #e5e7eb;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  flex-shrink:0;
+}
+
+#modalTitle{
+  font-weight:700;
+}
+
+#closeBtn{
+  border:none;
+  background:#111;
+  color:white;
+  border-radius:10px;
+  padding:8px 14px;
+  cursor:pointer;
+}
+
+#plannerFrame{
+  width:100%;
+  height:100%;
+  border:none;
+}
+
+
+/* =========================
+   모바일
+========================= */
+
+@media (max-width: 768px){
+
+  body{
+    padding:16px;
+  }
+
+  h1{
+    font-size:36px;
+  }
+
+  #calendar{
+    grid-template-columns:repeat(7, 1fr);
+    gap:6px;
+  }
+
+  #weekdays{
+    grid-template-columns:repeat(7, 1fr);
+    gap:6px;
+  }
+
+  .day{
+    width:42px;
+    height:42px;
+    font-size:15px;
+  }
+
+  .weekday{
+    font-size:15px;
+  }
+
+  .month-nav-btn{
+    width:44px;
+    height:44px;
+    font-size:20px;
+  }
+
+  #monthlyStats{
+    padding:16px;
+  }
+
+  .stat-name{
+    width:80px;
+    font-size:14px;
+  }
+
+  .stat-percent{
+    font-size:14px;
+  }
+
+  .stat-row{
+    font-size:14px;
+  }
+
+  .empty-day{
+    min-height:60px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+
+<div id="topBar">
+  <button class="month-nav-btn" id="prevMonthBtn">◀</button>
+  <h1 id="monthTitle"></h1>
+  <button class="month-nav-btn" id="nextMonthBtn">▶</button>
+</div>
+
+
+<!-- =========================
+     월별 통계
+========================= -->
+
+<div id="monthlyStats">
+
+  <div class="stats-title">
+    📊 이번 달 진행 상황
+  </div>
+
+  <div class="stat-row">
+
+    <div class="stat-name">
+      글쓰기
+    </div>
+
+    <div class="stat-bar">
+      <div
+        class="stat-fill"
+        id="editingBar"
+      ></div>
+    </div>
+
+    <div
+      class="stat-percent"
+      id="editingPercent"
+    >
+      0%
+    </div>
+
+  </div>
+
+
+  <div class="stat-row">
+
+    <div class="stat-name">
+      사진 추가
+    </div>
+
+    <div class="stat-bar">
+      <div
+        class="stat-fill"
+        id="photoBar"
+      ></div>
+    </div>
+
+    <div
+      class="stat-percent"
+      id="photoPercent"
+    >
+      0%
+    </div>
+
+  </div>
+
+
+  <div class="stat-row">
+
+    <div class="stat-name">
+      대표 사진
+    </div>
+
+    <div class="stat-bar">
+      <div
+        class="stat-fill"
+        id="nomainBar"
+      ></div>
+    </div>
+
+    <div
+      class="stat-percent"
+      id="nomainPercent"
+    >
+      0%
+    </div>
+
+  </div>
+
+
+  <div class="stat-row total-stat">
+
+    <div class="stat-name">
+      총 진행률
+    </div>
+
+    <div class="stat-bar">
+      <div
+        class="stat-fill"
+        id="totalBar"
+      ></div>
+    </div>
+
+    <div
+      class="stat-percent"
+      id="totalPercent"
+    >
+      0%
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- 요일 -->
+
+<div id="weekdays">
+
+  <div class="weekday sunday">일</div>
+  <div class="weekday">월</div>
+  <div class="weekday">화</div>
+  <div class="weekday">수</div>
+  <div class="weekday">목</div>
+  <div class="weekday">금</div>
+  <div class="weekday saturday">토</div>
+
+</div>
+
+
+<!-- 캘린더 -->
+
+<div id="calendar"></div>
+
+
+<!-- 모달 -->
+
+<div id="overlay">
+
+  <div id="modalWindow">
+
+    <div id="modalHeader">
+
+      <div id="modalTitle">
+        플래너
+      </div>
+
+      <button id="closeBtn">
+        닫기
+      </button>
+
+    </div>
+
+    <iframe id="plannerFrame"></iframe>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth() + 1;
+
+
+const monthTitle =
+  document.getElementById("monthTitle");
+
+const calendar =
+  document.getElementById("calendar");
+
+const overlay =
+  document.getElementById("overlay");
+
+const plannerFrame =
+  document.getElementById("plannerFrame");
+
+const modalTitle =
+  document.getElementById("modalTitle");
+
+const closeBtn =
+  document.getElementById("closeBtn");
+
+const prevMonthBtn =
+  document.getElementById("prevMonthBtn");
+
+const nextMonthBtn =
+  document.getElementById("nextMonthBtn");
+
+
+function pad(n){
+
+  return String(n).padStart(2,"0");
+
+}
+
+
+function getDateString(day){
+
+  return `${currentYear}-${pad(currentMonth)}-${pad(day)}`;
+
+}
+
+
+/* =========================
+   월 제목
+========================= */
+
+function updateMonthTitle(){
+
+  monthTitle.textContent =
+    `${currentYear}년 ${currentMonth}월`;
+
+}
+
+
+/* =========================
+   월별 통계
+========================= */
+
+function updateMonthlyStats(){
+
+  const lastDay =
+    new Date(
+      currentYear,
+      currentMonth,
+      0
+    ).getDate();
+
+
+  let editingCount = 0;
+  let photoCount = 0;
+  let nomainCount = 0;
+
+
+  for(let day = 1; day <= lastDay; day++){
+
+    const dateStr =
+      getDateString(day);
+
+    const saved = JSON.parse(
+      localStorage.getItem(
+        "check_" + dateStr
+      ) || "[]"
+    );
+
+
+    if(saved.includes("editing")){
+      editingCount++;
+    }
+
+    if(saved.includes("photo")){
+      photoCount++;
+    }
+
+    if(saved.includes("nomain")){
+      nomainCount++;
+    }
+
+  }
+
+
+  const editingPercent =
+    Math.round(
+      editingCount / lastDay * 100
+    );
+
+  const photoPercent =
+    Math.round(
+      photoCount / lastDay * 100
+    );
+
+  const nomainPercent =
+    Math.round(
+      nomainCount / lastDay * 100
+    );
+
+
+  const totalChecked =
+    editingCount +
+    photoCount +
+    nomainCount;
+
+
+  const totalPossible =
+    lastDay * 3;
+
+
+  const totalPercent =
+    Math.round(
+      totalChecked /
+      totalPossible *
+      100
+    );
+
+
+  // 숫자 표시
+
+  document.getElementById(
+    "editingPercent"
+  ).textContent =
+    editingPercent + "%";
+
+
+  document.getElementById(
+    "photoPercent"
+  ).textContent =
+    photoPercent + "%";
+
+
+  document.getElementById(
+    "nomainPercent"
+  ).textContent =
+    nomainPercent + "%";
+
+
+  document.getElementById(
+    "totalPercent"
+  ).textContent =
+    totalPercent + "%";
+
+
+  // 막대 길이
+
+  document.getElementById(
+    "editingBar"
+  ).style.width =
+    editingPercent + "%";
+
+
+  document.getElementById(
+    "photoBar"
+  ).style.width =
+    photoPercent + "%";
+
+
+  document.getElementById(
+    "nomainBar"
+  ).style.width =
+    nomainPercent + "%";
+
+
+  document.getElementById(
+    "totalBar"
+  ).style.width =
+    totalPercent + "%";
+
+}
+
+
+/* =========================
+   체크창 열기
+========================= */
+
+function openPlanner(day){
+
+  const dateStr =
+    getDateString(day);
+
+  modalTitle.textContent =
+    `아오분와집`;
+
+  plannerFrame.src =
+    `check.html?date=${dateStr}`;
+
+  overlay.style.display =
+    "flex";
+
+}
+
+
+/* =========================
+   체크창 닫기
+========================= */
+
+function closePlanner(){
+
+  overlay.style.display =
+    "none";
+
+  plannerFrame.src =
+    "";
+
+  renderCalendar();
+
+}
+
+
+closeBtn.onclick =
+  closePlanner;
+
+
+overlay.addEventListener(
+  "click",
+  (e)=>{
+
+    if(e.target === overlay){
+
+      closePlanner();
+
+    }
+
+  }
+);
+
+
+/* =========================
+   이전 달
+========================= */
+
+prevMonthBtn.onclick = ()=>{
+
+  currentMonth--;
+
+  if(currentMonth < 1){
+
+    currentMonth = 12;
+    currentYear--;
+
+  }
+
+  renderCalendar();
+
+};
+
+
+/* =========================
+   다음 달
+========================= */
+
+nextMonthBtn.onclick = ()=>{
+
+  currentMonth++;
+
+  if(currentMonth > 12){
+
+    currentMonth = 1;
+    currentYear++;
+
+  }
+
+  renderCalendar();
+
+};
+
+
+/* =========================
+   캘린더 생성
+========================= */
+
+function renderCalendar(){
+
+  calendar.innerHTML = "";
+
+  updateMonthTitle();
+
+  updateMonthlyStats();
+
+
+  const firstDay =
+    new Date(
+      currentYear,
+      currentMonth - 1,
+      1
+    ).getDay();
+
+
+  const lastDay =
+    new Date(
+      currentYear,
+      currentMonth,
+      0
+    ).getDate();
+
+
+  // 빈 날짜
+
+  for(
+    let i = 0;
+    i < firstDay;
+    i++
+  ){
+
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "empty-day";
+
+    calendar.appendChild(
+      empty
+    );
+
+  }
+
+
+  // 날짜
+
+  for(
+    let day = 1;
+    day <= lastDay;
+    day++
+  ){
+
+    const btn =
+      document.createElement("button");
+
+    btn.className =
+      "day";
+
+    btn.textContent =
+      day;
+
+
+    const dateStr =
+      getDateString(day);
+
+
+    const saved = JSON.parse(
+      localStorage.getItem(
+        "check_" + dateStr
+      ) || "[]"
+    );
+
+
+    const count =
+      saved.length;
+
+
+    if(count === 0){
+
+      btn.classList.add(
+        "before"
+      );
+
+    }
+
+    else if(count === 1){
+
+      btn.classList.add(
+        "editing"
+      );
+
+    }
+
+    else if(count === 2){
+
+      btn.classList.add(
+        "photo"
+      );
+
+    }
+
+    else if(count === 3){
+
+      btn.classList.add(
+        "nomain"
+      );
+
+    }
+
+
+    btn.onclick = ()=>{
+
+      openPlanner(day);
+
+    };
+
+
+    calendar.appendChild(
+      btn
+    );
+
+  }
+
+}
+
+
+/* =========================
+   시작
+========================= */
+
+renderCalendar();
+
+</script>
+
+</body>
+</html>
+
